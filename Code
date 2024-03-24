@@ -1,0 +1,181 @@
+#This code was written in a JupyterLyte notebook
+import numpy as np
+rng = np.random.default_rng()
+
+#Inputs to change
+#These should be non-negative integers, not all 0
+inputa = 51
+inputb = 21
+inputc = 13
+#These should be positive integers
+runs = 10000
+collisioncapmagnitude = 5
+failcap = 10
+#These should be 'True' or 'False'
+showruns = False
+truesimulation = True
+destroy = True
+#'inputa' corresponds to the starting number of particles of a, similar for 'inputb' and 'inputc'
+#'runs' is how many times the program will run
+#'collisioncapmagnitude' is how many collisions need to occur for the program to abandon it's run
+#The maximum number of collisions allowed is set to 10^(collisioncapmagnitude), so recommended number is 5 or 6
+#'failcap' is how many failures are allowed before the whole program terminates; 1 is usually enough
+#'truesimulation' is whether the probabilities of particle collisions are proportinal to the number of particles left, or all 1/3
+#'truesimulation = False' is mostly useful for determining whether there is a solution or not
+#'destroy' is used for the extension; 'True' is the extension, 'False' is the main problem
+
+#Checking for input mistakes
+if inputa == 0 and inputb == 0 and inputc == 0:
+    print("Error: total number of particles cannot be 0.")
+    runs = 0
+if inputa<0:
+    inputa = -inputa
+    print("Error: 'inputa' cannot be negative. It has been set to", inputa, "for you.")
+if inputb<0:
+    inputb = -inputb
+    print("Error: 'inputb' cannot be negative. It has been set to", inputb, "for you.")
+if inputc<0:
+    inputc = -inputc
+    print("Error: 'inputc' cannot be negative. It has been set to", inputc, "for you.")
+if runs<0:
+    runs = -runs
+    print("Error: 'runs' cannot be negative. It has been set to", runs, "for you.")
+if failcap<=0:
+    print("Error: 'failcap' must be positive. It has been set to 1 for you.")
+    failcap = 1
+if not truesimulation == True and not truesimulation == False:
+    print("Error: 'truesimulation' must be set to 'True' or 'False'. It has been set to 'True' for you.")
+    truesimulation = True
+if not showruns == True and not showruns == False:
+    print("Error: 'showruns' must be set to 'True' or 'False'. It has been set to 'False' for you.")
+    showruns = False
+if not destroy == True and not destroy == False:
+    print("Error: 'destroy' must be set to 'True' or 'False'. It has been set to 'False' for you.")
+    destroy = False
+if isinstance(inputa, int) == False:
+    inputa = round(inputa)
+    print("Error: 'inputa' must be an integer. It has been rounded to", inputa, "for you.")
+if isinstance(inputb, int) == False:
+    inputb = round(inputb)
+    print("Error: 'inputb' must be an integer. It has been rounded to", inputb, "for you.")
+if isinstance(inputc, int) == False:
+    inputc = round(inputc)
+    print("Error: 'inputc' must be an integer. It has been rounded to", inputc, "for you.")
+if isinstance(runs, int) == False:
+    runs = round(runs)
+    print("Error: 'runs' must be an integer. It has been rounded to", runs, "for you.")
+if isinstance(failcap, int) == False:
+    failcap = round(failcap)
+    print("Error: 'failcap' must be an integer. It has been rounded to", failcap, "for you.")
+if isinstance(collisioncapmagnitude, int) == False:
+    collisioncapmagnitude = round(collisioncapmagnitude)
+    print("Error: 'collisioncapmagnitude' must be an integer. It has been rounded to", collisioncapmagnitude, "for you.")
+
+#Bunch of variables, most need to be 0 initially
+awins = 0
+bwins = 0
+cwins = 0
+collisionsa = 0
+collisionsb = 0
+collisionsc = 0
+fails = 0
+startruns = runs
+collisioncap = 10**collisioncapmagnitude
+
+#Here is the simulation of the number of particles
+print("........................................................................................")
+while runs>0:
+    test = True
+    collisions = 0
+    a = inputa
+    b = inputb
+    c = inputc
+    while test == True:
+        operation = -1
+        if truesimulation == True:
+            totalparticles = a+b+c
+            particlex = rng.integers(0,totalparticles)
+            particley = rng.integers(0,totalparticles)
+            if particley < particlex:
+                medium = particley
+                particley = particlex
+                particlex = medium
+            if particlex<a and a<= particley <a+b:
+                operation = 2
+            if particlex<a and a+b<= particley:
+                operation = 1
+            if a<=particlex<a+b and a+b<= particley:
+                operation = 0
+        if truesimulation == False:
+            operation = rng.integers(0,3)
+        if operation == 0:
+            if b>0 and c>0:
+                if destroy == True:
+                    a = a+1
+                else:
+                    a = a+2
+                b = b-1
+                c = c-1
+                collisions = collisions+1
+        if operation == 1:
+            if a>0 and c>0:
+                a = a-1
+                if destroy == True:
+                    b = b+1
+                else:
+                    b = b+2
+                c = c-1
+                collisions = collisions+1
+        if operation == 2:
+            if a>0 and b>0:
+                a = a-1
+                b = b-1
+                if destroy == True:
+                    c = c+1
+                else:
+                    c = c+2
+                collisions = collisions+1
+        if a == 0 and b == 0:
+            collisionsc = collisionsc + collisions
+            cwins = cwins+1
+            test = False
+        if a == 0 and c == 0:
+            collisionsb = collisionsb + collisions
+            bwins = bwins+1
+            test = False
+        if b == 0 and c == 0:
+            collisionsa = collisionsa + collisions
+            awins = awins+1
+            test = False
+        if collisions > collisioncap:
+            fails = fails+1
+            test = False
+    runs = runs-1
+    if fails >= failcap:
+        print("The failcap of", failcap, "was reached, so the program will be terminated early.")
+        runsdone = startruns - runs
+        runs = 0
+    if showruns == True:
+        print(runs, "left")
+if fails<failcap:
+    runsdone = startruns
+if inputa+inputb+inputc > 0:
+    if awins == 0:
+        print("The final state was 'a' 0 times, with approximate probability 0.")
+    else:
+        print("The final state was 'a'", awins, "times, with approximate probability", awins/startruns,", and an approximate average of", collisionsa/awins, "collisions.")
+    if bwins == 0:
+        print("The final state was 'b' 0 times, with approximate probability 0.")
+    else:
+        print("The final state was 'b'", bwins, "times, with approximate probability", bwins/startruns,", and an approximate average of", collisionsb/bwins, "collisions.")
+    if cwins == 0:
+        print("The final state was 'c' 0 times, with approximate probability 0.")
+    else:
+        print("The final state was 'c'", cwins, "times, with approximate probability", cwins/startruns,", and an approximate average of", collisionsc/cwins, "collisions.")
+    if fails == 0:
+        print("The program found a solution in all", startruns, "runs.")
+    else:
+        print("The program failed to find a solution", fails, "times.")
+        if fails >= failcap:
+            print("This caused the program to terminate after", runsdone, "runs (initially", startruns, "were requested).")
+        print("An estimate for the probability of failure is", fails/runsdone)
