@@ -4,9 +4,9 @@ rng = np.random.default_rng()
 
 #Inputs to change
 #These should be non-negative integers, not all 0
-inputa = 51
-inputb = 21
-inputc = 13
+inputa = 4
+inputb = 3
+inputc = 2
 #These should be positive integers
 runs = 10000
 collisioncapmagnitude = 5
@@ -14,7 +14,7 @@ failcap = 10
 #These should be 'True' or 'False'
 showruns = False
 truesimulation = True
-destroy = True
+destroy = False
 #'inputa' corresponds to the starting number of particles of a, similar for 'inputb' and 'inputc'
 #'runs' is how many times the program will run
 #'collisioncapmagnitude' is how many collisions need to occur for the program to abandon it's run
